@@ -1,0 +1,35 @@
+# Node / React
+node_modules/
+dist/
+build/
+.vite/
+npm-debug.log*
+
+# PHP / Backend
+# Ignoring the specific file containing production database credentials
+backend/config/db.php
+
+# Environment and Secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env.*
+
+# Logs
+*.log
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+*.swo
