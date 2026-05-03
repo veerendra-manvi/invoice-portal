@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import api from '../services/api';
+import { API_BASE_URL } from '../config/api';
 import Navbar from '../components/Navbar';
 import StatCard from '../components/StatCard';
 import StatusBadge from '../components/StatusBadge';
@@ -11,30 +13,35 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+  // Get user from localStorage
+  const userString = localStorage.getItem("user");
+  const user = userString ? JSON.parse(userString) : null;
 
   useEffect(() => {
+    if (!user || !user.id) {
+      navigate("/login");
+      return;
+    }
     fetchStats();
-  }, []);
+  }, [navigate]);
 
   const fetchStats = async () => {
+    if (!user || !user.id) return;
+    
     try {
       setLoading(true);
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-
-      if (!user || !user.id) {
-        navigate('/login');
-        return;
-      }
-
-      const response = await api.get(`dashboard.php?user_id=${user.id}`);
+      setError('');
+      
+      const response = await axios.get(`${API_BASE_URL}/dashboard.php?user_id=${user.id}`);
+      
       if (response.data.status === 'success') {
         setStats(response.data.data);
       } else {
         setError(response.data.message || 'Failed to load stats');
       }
     } catch (err) {
-      console.error("DASHBOARD FETCH ERROR:", err);
+      console.error(err.response?.data || err.message);
       setError(err.response?.data?.message || 'An error occurred while fetching dashboard data.');
     } finally {
       setLoading(false);
@@ -58,7 +65,7 @@ const Dashboard = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="mt-1 text-gray-600">Welcome back, <span className="font-semibold text-blue-600">{user.name}</span>! Here's what's happening today.</p>
+          <p className="mt-1 text-gray-600">Welcome back, <span className="font-semibold text-blue-600">{user?.name}</span>! Here's what's happening today.</p>
         </div>
 
         {error && (

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import { API_BASE_URL } from '../config/api';
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -9,7 +10,7 @@ const Navbar = () => {
   const handleLogout = async () => {
     try {
       // Call server-side logout
-      await api.post('/auth.php?action=logout');
+      await api.post(`${API_BASE_URL}/auth.php?action=logout`);
     } catch (err) {
       console.error("Logout error:", err);
     } finally {

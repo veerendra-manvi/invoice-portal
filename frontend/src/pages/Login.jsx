@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../services/api';
+import { API_BASE_URL } from '../config/api';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -16,9 +18,11 @@ const Login = () => {
 
     try {
       // Calling /auth.php?action=login as requested
-      const response = await api.post('/auth.php?action=login', {
+      const response = await axios.post(`${API_BASE_URL}/auth.php?action=login`, {
         email,
         password,
+      }, {
+        headers: { "Content-Type": "application/json" }
       });
 
       // Checking response.data.status === "success"

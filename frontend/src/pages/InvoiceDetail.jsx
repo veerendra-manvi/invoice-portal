@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
-import { API_BASE_URL } from '../services/api';
+import { API_BASE_URL } from '../config/api';
 import Navbar from '../components/Navbar';
 import StatusBadge from '../components/StatusBadge';
 import { formatCurrency } from '../utils/formatCurrency';
@@ -54,7 +54,7 @@ const InvoiceDetail = () => {
         setError(response.data.message || 'Invoice not found');
       }
     } catch (err) {
-      console.error("FETCH INVOICE DETAIL ERROR:", err);
+      console.error(err.response?.data || err.message);
       setError(err.response?.data?.message || 'Error loading invoice.');
     } finally {
       setLoading(false);

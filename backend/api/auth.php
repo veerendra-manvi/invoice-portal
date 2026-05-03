@@ -46,13 +46,13 @@ function handleRegister($pdo, $input) {
         return;
     }
 
-    $name = isset($input['name']) ? trim($input['name']) : '';
+    $username = isset($input['name']) ? trim($input['name']) : '';
     $email = isset($input['email']) ? trim($input['email']) : '';
     $password = isset($input['password']) ? $input['password'] : '';
     $businessName = isset($input['business_name']) ? trim($input['business_name']) : null;
 
     // Validation
-    if (empty($name) || empty($email) || empty($password)) {
+    if (empty($username) || empty($email) || empty($password)) {
         http_response_code(400);
         echo json_encode(["status" => "error", "message" => "Name, email, and password are required."]);
         return;
@@ -78,8 +78,8 @@ function handleRegister($pdo, $input) {
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
         // Insert new user with business details
-        $stmt = $pdo->prepare("INSERT INTO users (name, email, password, business_name, currency, tax_rate) VALUES (?, ?, ?, ?, 'INR', 0)");
-        $stmt->execute([$name, $email, $hashedPassword, $businessName]);
+        $stmt = $pdo->prepare("INSERT INTO users (username, email, password, business_name, currency, tax_rate) VALUES (?, ?, ?, ?, 'INR', 0)");
+        $stmt->execute([$username, $email, $hashedPassword, $businessName]);
         
         $userId = $pdo->lastInsertId();
 
@@ -132,7 +132,12 @@ function handleLogin($pdo, $input) {
             echo json_encode([
                 "status" => "success",
                 "message" => "Login successful.",
-                "user" => $user
+                "user" => [
+                    "id" => $user['id'],
+                    "name" => $user['username'] ?? $user['name'] ?? '',
+                    "email" => $user['email'],
+                    "business_name" => $user['business_name']
+                ]
             ]);
         } else {
             http_response_code(401);

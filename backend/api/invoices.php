@@ -23,7 +23,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 $input = json_decode(file_get_contents('php://input'), true);
 
 // Action-based routing
-if ($action === "get") {
+if ($action === "get" || $action === "list" || $action === "getAll") {
     if ($id) {
         handleGetSingleInvoice($pdo, $user_id, $id);
     } else {

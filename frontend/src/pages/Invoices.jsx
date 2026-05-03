@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import Navbar from '../components/Navbar';
-import invoiceService from '../services/invoiceService';
+import { API_BASE_URL } from '../config/api';
 import StatusBadge from '../components/StatusBadge';
 import { formatCurrency } from '../utils/formatCurrency';
 
@@ -9,6 +10,7 @@ const Invoices = () => {
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchInvoices();
@@ -17,12 +19,25 @@ const Invoices = () => {
   const fetchInvoices = async () => {
     try {
       setLoading(true);
-      const res = await invoiceService.getInvoices();
-      if (res.status === 'success') {
-        setInvoices(res.data);
+      setError('');
+
+      const userString = localStorage.getItem("user");
+      if (!userString) {
+        navigate('/login');
+        return;
+      }
+      const user = JSON.parse(userString);
+      if (!user || !user.id) {
+        navigate('/login');
+        return;
+      }
+
+      const res = await axios.get(`${API_BASE_URL}/invoices.php?action=list&user_id=${user.id}`);
+      if (res.data.status === 'success') {
+        setInvoices(res.data.data);
       }
     } catch (err) {
-      console.error("FETCH INVOICES ERROR:", err);
+      console.error(err.response?.data || err.message);
       setError(err.response?.data?.message || 'Failed to fetch invoices.');
     } finally {
       setLoading(false);

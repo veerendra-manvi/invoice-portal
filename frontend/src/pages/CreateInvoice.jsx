@@ -78,11 +78,18 @@ const CreateInvoice = () => {
     e.preventDefault();
     if (!isFormValid()) return;
 
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    if (!user.id) {
+      navigate('/login');
+      return;
+    }
+
     setLoading(true);
     try {
       const payload = {
         ...formData,
-        items
+        items,
+        user_id: user.id
       };
       const res = await invoiceService.createInvoice(payload);
       if (res.status === 'success') {
@@ -92,7 +99,7 @@ const CreateInvoice = () => {
         }, 1500);
       }
     } catch (err) {
-      console.error("CREATE INVOICE ERROR:", err);
+      console.error(err.response?.data || err.message);
       alert(err.response?.data?.message || 'Error creating invoice. Please try again.');
     } finally {
       setLoading(false);

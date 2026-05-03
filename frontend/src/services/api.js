@@ -1,15 +1,21 @@
 import axios from "axios";
-
-// Deployed API Base URL
-export const API_BASE_URL = "https://invoiceportal.rf.gd/backend/api";
+import { API_BASE_URL } from "../config/api";
 
 const api = axios.create({
-  baseURL: API_BASE_URL,
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },
 });
+
+// Response interceptor for error handling
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    console.error("API ERROR:", error.response?.data || error.message);
+    return Promise.reject(error);
+  }
+);
 
 // Add interceptor to include user_id in every request
 api.interceptors.request.use((config) => {

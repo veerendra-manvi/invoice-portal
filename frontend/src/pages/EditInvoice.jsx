@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
-import { API_BASE_URL } from '../services/api';
+import { API_BASE_URL } from '../config/api';
 import Navbar from '../components/Navbar';
 import { formatCurrency } from '../utils/formatCurrency';
 
@@ -54,8 +54,8 @@ const EditInvoice = () => {
           setItems(invoiceRes.data.data.items);
         }
       } catch (err) {
-        console.error("Initialization error", err);
-        alert("Failed to load invoice data");
+      console.error(err.response?.data || err.message);
+      alert(err.response?.data?.message || 'Error loading invoice. Please try again.');
         navigate('/invoices');
       } finally {
         setLoading(false);
@@ -100,7 +100,7 @@ const EditInvoice = () => {
         setTimeout(() => navigate(`/invoices/${invoiceId}`), 1000);
       }
     } catch (err) {
-      console.error("Update error", err);
+      console.error(err.response?.data || err.message);
       alert("Failed to update invoice");
     } finally {
       setSubmitting(false);

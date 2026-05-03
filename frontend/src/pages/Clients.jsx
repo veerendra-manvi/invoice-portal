@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import Navbar from '../components/Navbar';
+import { API_BASE_URL } from '../config/api';
 import clientService from '../services/clientService';
 
 const Clients = () => {
@@ -7,6 +10,7 @@ const Clients = () => {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [error, setError] = useState('');
+  const navigate = useNavigate();
   
   // Form State
   const [formData, setFormData] = useState({
@@ -23,12 +27,25 @@ const Clients = () => {
   const fetchClients = async () => {
     try {
       setLoading(true);
-      const res = await clientService.getClients();
-      if (res.status === 'success') {
-        setClients(res.data);
+      setError('');
+
+      const userString = localStorage.getItem("user");
+      if (!userString) {
+        navigate('/login');
+        return;
+      }
+      const user = JSON.parse(userString);
+      if (!user || !user.id) {
+        navigate('/login');
+        return;
+      }
+
+      const res = await axios.get(`${API_BASE_URL}/clients.php?user_id=${user.id}`);
+      if (res.data.status === 'success') {
+        setClients(res.data.data);
       }
     } catch (err) {
-      console.error("FETCH CLIENTS ERROR:", err);
+      console.error(err.response?.data || err.message);
       setError(err.response?.data?.message || 'Failed to fetch clients.');
     } finally {
       setLoading(false);
@@ -38,7 +55,13 @@ const Clients = () => {
   const handleAddClient = async (e) => {
     e.preventDefault();
     try {
-      const res = await clientService.createClient(formData);
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      if (!user.id) {
+        navigate('/login');
+        return;
+      }
+      
+      const res = await clientService.createClient({ ...formData, user_id: user.id });
       if (res.status === 'success') {
         setShowModal(false);
         setFormData({ name: '', email: '', phone: '', address: '' });
@@ -53,6 +76,7 @@ const Clients = () => {
   const handleDeleteClient = async (id) => {
     if (window.confirm('Are you sure you want to delete this client?')) {
       try {
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
         const res = await clientService.deleteClient(id);
         if (res.status === 'success') {
           fetchClients();
